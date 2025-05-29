@@ -6,7 +6,7 @@ Goal of repo is to save automation work in case docker container is deleted by a
 
 ### Set up
 
-Instructions for adding a docker instance to local for non-subscription n8n: https://docs.n8n.io/hosting/installation/docker/
+Instructions for adding a docker instance to local to avoid cloud subscription of n8n: https://docs.n8n.io/hosting/installation/docker/
 
 Simple set up:
 
@@ -22,4 +22,8 @@ In case you delete a container you'll have to run the following command again:
 docker run -it --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
 ```
 
-After your n8n instance is running, simply drag and drop your json files and connect the API keys for each integration.
+After your n8n instance is running, you'll have to:
+
+1. Create each workflow in the app
+2. Drag and drop your json files
+3. Connect the API keys for each integration of your workflow.
