@@ -1,0 +1,216 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 11
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1000,
+        -80
+      ],
+      "id": "3496d8ff-cf9f-4211-8c1e-02e17e0a5f48",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 100,
+        "filters": {
+          "receivedAfter": "={{$today.minus(1, 'days')}}",
+          "receivedBefore": "={{ $today }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -780,
+        -80
+      ],
+      "id": "eff8511e-629d-40fc-82cc-925b4c77e307",
+      "name": "Gmail",
+      "webhookId": "932a872c-4847-41d3-b2e1-bfe9c4c34be3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qW4DT5kS1cCARCrH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f756f4c6-f493-4b44-8539-db0e5a408214",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "tecnoempleo.com",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "a0f9d62e-0360-478e-9f5e-58d7eb2ac52e",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "noreply@jobright.ai",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "98f542ad-5952-44eb-84bf-0fea922ed8f0",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "mailer@jobleads.com",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "6dfcd5df-8a04-4f0f-a58e-c2bb136f14d1",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "hello@heartbeat.chat",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "6c0df80d-e9d3-4cbb-a83e-4908f32bf7e7",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "jobalerts-noreply@linkedin.com",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        -80
+      ],
+      "id": "097af71c-7416-479e-beba-fdcbb9df5caa",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -340,
+        -80
+      ],
+      "id": "31e77b32-238d-4755-99f7-6ea9bc6c678b",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -120,
+        20
+      ],
+      "id": "fcad19d2-7e0b-4dfb-b99a-7deb2305449b",
+      "name": "Gmail1",
+      "webhookId": "9f29d464-4965-46f5-995f-859378e9e2a5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qW4DT5kS1cCARCrH",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "815880a4dcd128e81b04317454bb4a1905e8375debc72d7d05897bcf499c8ba3"
+  }
+}
