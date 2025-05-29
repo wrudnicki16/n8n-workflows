@@ -5,7 +5,8 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 11
+              "field": "hours",
+              "hoursInterval": 4
             }
           ]
         }
@@ -39,7 +40,7 @@
       "webhookId": "932a872c-4847-41d3-b2e1-bfe9c4c34be3",
       "credentials": {
         "gmailOAuth2": {
-          "id": "qW4DT5kS1cCARCrH",
+          "id": "",
           "name": "Gmail account"
         }
       }
@@ -144,7 +145,7 @@
       "webhookId": "9f29d464-4965-46f5-995f-859378e9e2a5",
       "credentials": {
         "gmailOAuth2": {
-          "id": "qW4DT5kS1cCARCrH",
+          "id": "",
           "name": "Gmail account"
         }
       }
