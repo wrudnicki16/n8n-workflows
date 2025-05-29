@@ -4,6 +4,8 @@
 
 Goal of repo is to save automation work in case docker container is deleted by accident or I have to change computers.
 
+Make sure you sanitize all json files of credentials - they're internal ids, not direct api keys, but still good practice.
+
 ### Set up
 
 Instructions for adding a docker instance to local to avoid cloud subscription of n8n: https://docs.n8n.io/hosting/installation/docker/
