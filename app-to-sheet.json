@@ -64,7 +64,7 @@
       "typeVersion": 1,
       "credentials": {
         "openAiApi": {
-          "id": "ZMDYxqL5TywfBfmx",
+          "id": "",
           "name": "OpenAi account"
         }
       }
@@ -110,7 +110,7 @@
       "name": "OpenAI Chat Model1",
       "credentials": {
         "openAiApi": {
-          "id": "ZMDYxqL5TywfBfmx",
+          "id": "",
           "name": "OpenAi account"
         }
       }

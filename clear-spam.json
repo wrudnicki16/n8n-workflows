@@ -6,7 +6,7 @@
           "interval": [
             {
               "field": "hours",
-              "hoursInterval": 4
+              "hoursInterval": 2
             }
           ]
         }
@@ -25,7 +25,7 @@
         "operation": "getAll",
         "limit": 100,
         "filters": {
-          "receivedAfter": "={{$today.minus(1, 'days')}}",
+          "receivedAfter": "={{$today.minus(2, 'days')}}",
           "receivedBefore": "={{ $today }}"
         }
       },
@@ -95,6 +95,15 @@
               "id": "6c0df80d-e9d3-4cbb-a83e-4908f32bf7e7",
               "leftValue": "={{ $json.From }}",
               "rightValue": "jobalerts-noreply@linkedin.com",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "89b6cfb4-8aab-4cb8-86c6-e3e3b229423b",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "careerservice@email.jobleads.com",
               "operator": {
                 "type": "string",
                 "operation": "contains"
