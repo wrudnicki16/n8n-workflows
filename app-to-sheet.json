@@ -1,0 +1,335 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "id": "54a09886-f26f-4382-98ae-0cfc1fe80d09",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        220
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qW4DT5kS1cCARCrH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "=Classify this email based on\n\nSubject: \"{{ $json.Subject }}\"\nSnippet: \"{{ $json.snippet }}\"\n\nExclude emails that have negative sentiment like \"Unfortunately, we will have to pass on your application\"\nOutput the result from ChatGPT to the next node.",
+        "categories": {
+          "categories": [
+            {
+              "category": "job_application_receipt",
+              "description": "Email confirms or acknowledges my job application"
+            }
+          ]
+        },
+        "options": {
+          "fallback": "discard"
+        }
+      },
+      "id": "fd67cec7-c9cd-41d1-a12c-cfc7af03ed99",
+      "name": "Classify Job Email",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "position": [
+        -640,
+        220
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "bda5087f-b27f-494e-8059-555fa9b7f732",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -560,
+        440
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "ZMDYxqL5TywfBfmx",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "=Get the company name from the subject - {{$json.Subject}}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "company_name",
+              "description": "Name of the company in email subject"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.1,
+      "position": [
+        -264,
+        220
+      ],
+      "id": "dfb700c3-f464-4108-9dee-45421c0bbc1d",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -176,
+        440
+      ],
+      "id": "22eb8ee8-0ad7-40bf-8778-28788cffe678",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "ZMDYxqL5TywfBfmx",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18P7ZNRZ7GerPo9Xx3g9M1cYjDekOd01KbTzZX5a6op0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ \"Week \" + (($now.extract('year') - 2025) * 52 + ($now.extract('week') - 10)) }}",
+          "mode": "name"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "detectAutomatically",
+              "readRowsUntil": "firstEmptyRow"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        112,
+        220
+      ],
+      "id": "a45ceaeb-d746-48cb-9f41-ffc09bd24135",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GutwrHdiIrTRTuKn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "\nconst newValue = $('Information Extractor').first().json.output.company_name;\nconst rows = $('Google Sheets') || [];\nlet rowIndex = $('Google Sheets').last().json.row_number;\n\nconst currentVal = rows.last().json.Monday || \"\";\nlet updated;\nif (currentVal) {\n  updated = currentVal;\n  if (currentVal[currentVal.length - 1] !== ',') updated += ', ';\n  updated += newValue;\n} else {\n  updated = newValue;\n}\nreturn [{ json: { action: \"update\", row: rowIndex, value: updated } }];\n"
+      },
+      "id": "c86c1386-5062-452f-8837-606747c5f0ce",
+      "name": "Determine Upsert Action",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        332,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "sheet_name",
+              "value": "={{\"Week \" + (($now.extract('year') - 2025) * 52 + ($now.extract('week') - 10))}}"
+            },
+            {
+              "name": "Monday",
+              "value": "={{ $json.value }}"
+            }
+          ],
+          "number": [
+            {
+              "name": "row_number",
+              "value": "={{ $json.row }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2e730d7c-c074-496d-8e57-563215850be1",
+      "name": "Set Row + Value",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        552,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{`https://sheets.googleapis.com/v4/spreadsheets/18P7ZNRZ7GerPo9Xx3g9M1cYjDekOd01KbTzZX5a6op0/values/Week 12!B${$json.row_number}?valueInputOption=USER_ENTERED`}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "range",
+              "value": "={{ $json.sheet_name + \"!B\" + $json.row_number}}"
+            },
+            {
+              "name": "majorDimension",
+              "value": "ROWS"
+            },
+            {
+              "name": "values",
+              "value": "={{[[$json.Monday]]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "96a46c91-46bb-4eca-9406-c1cd634da8e2",
+      "name": "PUT Google Sheets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        772,
+        220
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GutwrHdiIrTRTuKn",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Classify Job Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Job Email": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classify Job Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Determine Upsert Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Upsert Action": {
+      "main": [
+        [
+          {
+            "node": "Set Row + Value",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Row + Value": {
+      "main": [
+        [
+          {
+            "node": "PUT Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "815880a4dcd128e81b04317454bb4a1905e8375debc72d7d05897bcf499c8ba3"
+  }
+}
