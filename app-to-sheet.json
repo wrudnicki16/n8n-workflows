@@ -28,7 +28,7 @@
     },
     {
       "parameters": {
-        "inputText": "=Classify this email based on\n\nSubject: \"{{ $json.Subject }}\"\nSnippet: \"{{ $json.snippet }}\"\n\nExclude emails that have negative sentiment like \"Unfortunately, we will have to pass on your application\"\nOutput the result from ChatGPT to the next node.",
+        "inputText": "=Classify this email based on\n\nSubject: \"{{ $json.Subject }}\"\nSnippet: \"{{ $json.snippet }}\"\n\nExclude emails that have negative sentiment like \"Unfortunately, we will have to pass on your application\", or \"After careful consideration, we have decided not to move forward with your application at this time\"\nAlso exclude emails that are job alerts for multiple companies rather than any one particular job.\nOutput the result from ChatGPT to the next node.",
         "categories": {
           "categories": [
             {
@@ -153,7 +153,7 @@
     },
     {
       "parameters": {
-        "functionCode": "\nconst newValue = $('Information Extractor').first().json.output.company_name;\nconst rows = $('Google Sheets') || [];\nlet rowIndex = $('Google Sheets').last().json.row_number;\n\nconst currentVal = rows.last().json.Monday || \"\";\nlet updated;\nif (currentVal) {\n  updated = currentVal;\n  if (currentVal[currentVal.length - 1] !== ',') updated += ', ';\n  updated += newValue;\n} else {\n  updated = newValue;\n}\nreturn [{ json: { action: \"update\", row: rowIndex, value: updated } }];\n"
+        "functionCode": "\nconst newValue = $('Information Extractor').first().json.output.company_name;\nconst rows = $('Google Sheets') || [];\nlet rowIndex = $('Google Sheets').last().json.row_number;\n\nconst currentVal = (rows.last().json.Monday || \"\").trim();\nlet updated;\nif (currentVal) {\n  updated = currentVal;\n  if (currentVal[currentVal.length - 1] !== ',') {\n    updated += ', ';\n  }\n  updated += ` ${newValue}`;\n} else {\n  updated = newValue;\n}\nreturn [{ json: { action: \"update\", row: rowIndex, value: updated } }];\n"
       },
       "id": "c86c1386-5062-452f-8837-606747c5f0ce",
       "name": "Determine Upsert Action",
@@ -199,7 +199,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "={{`https://sheets.googleapis.com/v4/spreadsheets/18P7ZNRZ7GerPo9Xx3g9M1cYjDekOd01KbTzZX5a6op0/values/Week 12!B${$json.row_number}?valueInputOption=USER_ENTERED`}}",
+        "url": "={{`https://sheets.googleapis.com/v4/spreadsheets/18P7ZNRZ7GerPo9Xx3g9M1cYjDekOd01KbTzZX5a6op0/values/${$json.sheet_name}!B${$json.row_number}?valueInputOption=USER_ENTERED`}}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleSheetsOAuth2Api",
         "sendBody": true,
