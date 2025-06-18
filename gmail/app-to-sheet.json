@@ -28,7 +28,7 @@
     },
     {
       "parameters": {
-        "inputText": "=Classify this email based on\n\nSubject: \"{{ $json.Subject }}\"\nSnippet: \"{{ $json.snippet }}\"\n\nExclude emails that have negative sentiment like \"Unfortunately, we will have to pass on your application\", or \"After careful consideration, we have decided not to move forward with your application at this time\"\nAlso exclude emails that are job alerts for multiple companies rather than any one particular job.\nOutput the result from ChatGPT to the next node.",
+        "inputText": "=Classify this email based on\n\nSubject: \"{{ $json.Subject }}\"\nSnippet: \"{{ $json.snippet }}\"\n\nExclude emails that have negative sentiment like \"Unfortunately, we will have to pass on your application\", or \"After careful consideration, we have decided not to move forward with your application at this time\"\nAlso exclude emails that are job alerts for multiple companies rather than any one particular job.\nAlso exclude emails that include EEO forms or coding challenge details.\nAlso exclude emails that say someone has viewed or reviewed my application.\nAlso exclude emails from wyattrudnicki@gmail.com\nOutput the result from ChatGPT to the next node.",
         "categories": {
           "categories": [
             {
@@ -52,6 +52,7 @@
     },
     {
       "parameters": {
+        "model": "gpt-4o",
         "options": {}
       },
       "id": "bda5087f-b27f-494e-8059-555fa9b7f732",
@@ -71,7 +72,7 @@
     },
     {
       "parameters": {
-        "text": "=Get the company name from the subject - {{$json.Subject}}",
+        "text": "=Get the company name from the subject - {{$json.Subject}}. If not available in the subject, then look for a company name in the email body - {{ $json.snippet }}",
         "attributes": {
           "attributes": [
             {
@@ -160,7 +161,7 @@
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        332,
+        340,
         220
       ]
     },
