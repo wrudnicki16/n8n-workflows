@@ -1,0 +1,247 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Get calendar availability and compose a response\nMake sure to update the Workflow ID if you are running this as 2 workflows",
+        "height": 482,
+        "width": 796
+      },
+      "id": "d0d8c6d3-32da-43ce-aca1-64b83902b8d0",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        580,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "3ed0fa25-86ee-4ab8-9c66-b6539b1ce030",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        740,
+        340
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sender: {{ $json.output.sender_name }}\nCompany: {{ $json.output.company_name }}\nJob Title: {{ $json.output.job_title }}\nEmail Text: {{ $json.output.message }}",
+        "options": {
+          "systemMessage": "=You are a Google Calendar scheduling assistant. Based on the received message, check my availability and propose an appropriate response.\nAim to get a specific time, rather than just a day. When checking my availability, make sure that there's enough time in between meetings.\nIf I'm not available, ALWAYS propose a new time based on my availability. When proposing a new time, always leave 15 minutes buffer from previous meeting.\nDon't give reasoning in the prompt response as to why I'm scheduling a particular day and time. The person trying to schedule shouldn't know what events are blocking my calendar.\nAlways propose dates between 9am and 5pm PT.\nInclude the following link - https://calendly.com/wyattrudnicki/15min - mention if they can't make the specified time they can check here for my availability.\nAlways end with a newline and \"Best,\" or \"Thanks,\" depending on what seems better, followed by another newline with \"Wyatt\".\nToday date and time is: {{ $now.toISO() }}."
+        }
+      },
+      "id": "2196122b-cdd1-44f2-a8fb-e651b3258311",
+      "name": "Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        760,
+        120
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "=wyattrudnicki@gmail.com",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $now.minus(1, 'day').toISO() }}",
+        "timeMax": "={{ $now.plus(1, 'month').toISO() }}",
+        "options": {}
+      },
+      "id": "8d04e2c8-aa24-4cd1-896d-50d5f89dc0e7",
+      "name": "Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "position": [
+        940,
+        340
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -100,
+        140
+      ],
+      "id": "2af06bf6-1a4f-4dd8-9124-09c70bbd6e82",
+      "name": "When chat message received",
+      "webhookId": "1dfd13b9-ec36-42e4-b4fa-3657c2a2cba3"
+    },
+    {
+      "parameters": {
+        "content": "## Check if incoming email is about appointment\nWe use LLM to check subject and body of the email and determine if it's an appointment request. ",
+        "height": 490,
+        "width": 617
+      },
+      "id": "edcedd20-2f1a-4430-bdf2-885a4becc5a7",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -160,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "id": "845eba86-aebb-4c0f-a03b-97dde4da3604",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        120,
+        320
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "=Extract the name of the sender (never Wyatt), the job title, and the company name if a company name is listed from the chat and it's NOT referencing something generic like \"A clinical AI company based in San Francisco\" or the recruiter company: {{ $json.chatInput }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "=company_name",
+              "description": "The company of the job description, left blank if only recruiter company name or some other generic company name exists ",
+              "required": true
+            },
+            {
+              "name": "sender_name",
+              "description": "Name of the sender, usually at the bottom of message",
+              "required": true
+            },
+            {
+              "name": "job_title",
+              "description": "Job title - should be something like \"Software Engineer\" or \"Full Stack Developer\"",
+              "required": true
+            },
+            {
+              "name": "message",
+              "description": "={{ $json.chatInput }}",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        120,
+        140
+      ],
+      "id": "7c6856aa-a461-43d1-8ef4-c82751ea4bf8",
+      "name": "Information Extractor"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bbd13935e8dda0768cb087430cb0e9af56f07646cab0816767a91ba0a50dadc6"
+  }
+}
