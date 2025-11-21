@@ -21,7 +21,7 @@ docker run -it --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n
 In case you delete a container you'll have to run the following command again:
 
 ```
-docker run -it --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
+docker run -it -d --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
 ```
 
 After your n8n instance is running, if your volume is blank you'll have to:
